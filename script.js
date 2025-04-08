@@ -1,5 +1,5 @@
 // Datos del juego
-const letras = ['p', 'm', 'l', 's', 'n', 'a', 'e', 'i', 'o', 'u'];
+const letras = ['p', 'm', 'l', 't', 's', 'n', 'd', 'a', 'e', 'i', 'o', 'u'];
 const silabas = ['pa', 'pe', 'pi', 'ma', 'me', 'mi', 'la', 'le', 'li', 'sa', 'se', 'si', 'na', 'ne', 'ni'];
 const palabras = {
     'pato': './imagenes/pato.jpg',
@@ -48,10 +48,9 @@ function crearElementoClickeable(texto, tipo) {
     elemento.textContent = texto;
     elemento.classList.add(tipo);
     
-    // Al hacer clic: agregar al área y reproducir sonido
+    // Al hacer clic: solo agregar al área (sin reproducir sonido)
     elemento.addEventListener('click', () => {
         agregarLetraAlArea(texto);
-        reproducirSonido(texto);
     });
     
     cuadroLetras.appendChild(elemento);
@@ -59,13 +58,6 @@ function crearElementoClickeable(texto, tipo) {
 
 // Agregar letra al área
 function agregarLetraAlArea(letra) {
-    // Verificar si ya existe
-    const letrasEnArea = Array.from(areaPalabra.children).map(el => el.textContent);
-    if (letrasEnArea.includes(letra)) {
-        retroalimentacion.textContent = '¡Ya usaste esta letra!';
-        return;
-    }
-
     const letraElemento = document.createElement('div');
     letraElemento.textContent = letra;
     letraElemento.classList.add('letra-seleccionada');
@@ -84,26 +76,21 @@ function verificarPalabra() {
     if (palabraFormada === palabraActual) {
         retroalimentacion.textContent = '¡Correcto! 🎉';
         retroalimentacion.style.color = '#2ecc71';
-        reproducirSonido(palabraActual, true); // Sonido de éxito
+        reproducirPalabraCompleta(palabraActual); // Solo reproduce la palabra completa
     } else if (palabraFormada.length === palabraActual.length) {
         retroalimentacion.textContent = '¡Ups! Intenta otra vez';
     }
 }
 
-// Función de sonido
-function reproducirSonido(texto, esExito = false) {
+// Función para reproducir solo la palabra completa
+function reproducirPalabraCompleta(palabra) {
     if (synth.speaking) synth.cancel(); // Detener si hay algo en reproducción
 
-    const utterance = new SpeechSynthesisUtterance(texto);
+    const utterance = new SpeechSynthesisUtterance();
     utterance.lang = 'es-ES';
-    
-    if (esExito) {
-        utterance.rate = 0.9;
-        utterance.pitch = 1.2;
-        utterance.text = `¡Muy bien! ${texto}`;
-    } else {
-        utterance.rate = 0.8;
-    }
+    utterance.text = palabra; // Solo la palabra, sin mensaje adicional
+    utterance.rate = 0.8;
+    utterance.pitch = 1.0;
     
     synth.speak(utterance);
 }
